@@ -1,0 +1,61 @@
+name: IC500 Cloud Report
+
+on:
+  schedule:
+    # 北京时间 08:40 = UTC 00:40
+    - cron: '40 0 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: '报告时段'
+        type: choice
+        options:
+          - premarket
+          - postclose
+          - swing
+        default: premarket
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Clone skills from GitLab (private)
+        run: |
+          git clone "https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/yi-group3513140/ic500test.git" /tmp/ic500src
+          cp -r /tmp/ic500src/cloud_test/skills cloud_test/skills
+
+      - name: Generate report
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+        run: |
+          SLOT="${{ github.event.inputs.slot || 'premarket' }}"
+          echo "===== 生成报告 时段: ${SLOT} ====="
+          cd cloud_test
+          python3 generate_with_llm.py --slot "${SLOT}"
+
+      - name: Commit report to gh-pages
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "bot@ic500.local"
+          git checkout --orphan gh-pages
+          git rm -rf --quiet .
+          cp -r cloud_test/output/* . 2>/dev/null || true
+          echo "ic500.weiyivip.top" > CNAME
+          echo "# IC500 云端测试报告" > README.md
+          git add -A
+          git commit -m "IC500 ${SLOT:-premarket} 报告 $(date +%Y%m%d)" || echo "nothing to commit"
+          git push origin gh-pages --force
