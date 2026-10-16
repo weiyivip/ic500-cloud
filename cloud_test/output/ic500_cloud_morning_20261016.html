@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IC500 盘前分析报告 ｜ 2026-10-16</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    background: #0f1419;
+    color: #e6edf3;
+    line-height: 1.65;
+    font-size: 15px;
+    padding: 12px;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  .header {
+    background: linear-gradient(135deg, #1a2332 0%, #0d1b2a 100%);
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin-bottom: 14px;
+    border: 1px solid #2d3f52;
+  }
+  .header h1 { font-size: 19px; color: #58a6ff; margin-bottom: 6px; }
+  .header .meta { font-size: 12.5px; color: #8b98a5; }
+  .header .meta span { margin-right: 12px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .badge-warn { background: #4a2d1a; color: #f0a35e; border: 1px solid #6b4423; }
+  .badge-info { background: #1a2d4a; color: #58a6ff; border: 1px solid #234a6b; }
+
+  .card {
+    background: #161b22;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #21262d;
+  }
+  .card-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #21262d;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-title::before {
+    content: "";
+    width: 3px; height: 15px;
+    background: #58a6ff;
+    border-radius: 2px;
+  }
+
+  .verdict-box {
+    background: linear-gradient(135deg, #2d1f0f 0%, #1a1208 100%);
+    border: 1px solid #6b4423;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .verdict-box .label { font-size: 12px; color: #8b98a5; margin-bottom: 4px; }
+  .verdict-box .value { font-size: 26px; font-weight: 800; color: #f0a35e; letter-spacing: 2px; }
+  .verdict-box .sub { font-size: 12.5px; color: #c9a06a; margin-top: 6px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .stat {
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #21262d;
+  }
+  .stat .k { font-size: 11px; color: #8b98a5; margin-bottom: 3px; }
+  .stat .v { font-size: 16px; font-weight: 700; }
+  .up { color: #f85149; }
+  .down { color: #3fb950; }
+  .neutral { color: #d29922; }
+  .blue { color: #58a6ff; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #21262d; }
+  th { color: #8b98a5; font-weight: 600; font-size: 12px; background: #0d1117; }
+  td { color: #c9d1d9; }
+  tr:last-child td { border-bottom: none; }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag-bear { background: #3d1a1a; color: #f85149; }
+  .tag-bull { background: #1a3d1a; color: #3fb950; }
+  .tag-mixed { background: #3d351a; color: #d29922; }
+  .tag-neutral { background: #1a2d3d; color: #58a6ff; }
+
+  .evidence {
+    background: #0d1117;
+    border-left: 3px solid #58a6ff;
+    border-radius: 0 6px 6px 0;
+    padding: 9px 12px;
+    margin: 8px 0;
+    font-size: 12.5px;
+    color: #8b98a5;
+  }
+  .evidence b { color: #c9d1d9; }
+
+  .plan-box {
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #21262d;
+  }
+  .plan-box .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed #21262d;
+  }
+  .plan-box .row:last-child { border-bottom: none; }
+  .plan-box .row .k { color: #8b98a5; }
+  .plan-box .row .v { color: #e6edf3; font-weight: 600; }
+
+  .alert {
+    background: #2d1a1a;
+    border: 1px solid #6b2323;
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-size: 13px;
+    color: #f0a35e;
+    margin: 10px 0;
+  }
+  .alert b { color: #f85149; }
+
+  .checklist { list-style: none; }
+  .checklist li {
+    padding: 7px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #21262d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .ok { color: #3fb950; font-weight: 700; }
+  .warn { color: #d29922; font-weight: 700; }
+
+  .footer {
+    text-align: center;
+    font-size: 11.5px;
+    color: #6e7681;
+    padding: 16px 0 8px;
+    border-top: 1px solid #21262d;
+    margin-top: 8px;
+  }
+
+  .scenario {
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 11px 13px;
+    margin-bottom: 9px;
+    border-left: 3px solid #58a6ff;
+  }
+  .scenario .title { font-size: 13.5px; font-weight: 700; color: #58a6ff; margin-bottom: 5px; }
+  .scenario .desc { font-size: 12.5px; color: #8b98a5; }
+  .scenario .desc b { color: #c9d1d9; }
+
+  .divider { height: 1px; background: #21262d; margin: 12px 0; }
+  .small { font-size: 12px; color: #8b98a5; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>IC500 盘前分析报告</h1>
+    <div class="meta">
+      <span>📅 2026-10-16</span>
+      <span>⏰ 盘前</span>
+      <span>合约 IC2612</span>
+    </div>
+    <div style="margin-top:8px;">
+      <span class="badge badge-warn">⚠ 流动性预警</span>
+      <span class="badge badge-info">数据基准 11:35:41</span>
+    </div>
+  </div>
+
+  <!-- 第一屏：核心裁决 -->
+  <div class="card">
+    <div class="card-title">核心裁决</div>
+
+    <div class="verdict-box">
+      <div class="label">趋势裁决</div>
+      <div class="value">观 望</div>
+      <div class="sub">置信度：低 ｜ 市场状态：陷阱行情（假突破）</div>
+    </div>
+
+    <div class="grid3">
+      <div class="stat">
+        <div class="k">当前价</div>
+        <div class="v up">6780.8</div>
+      </div>
+      <div class="stat">
+        <div class="k">涨跌幅</div>
+        <div class="v up">+2.15%</div>
+      </div>
+      <div class="stat">
+        <div class="k">五维评分</div>
+        <div class="v neutral">48</div>
+      </div>
+    </div>
+
+    <div class="alert" style="margin-top:12px;">
+      <b>⛔ 双一票否决触发：</b>信号真实性验证仅通过 2/5 项（弱信号），且流动性严重不足（vol_ratio=0.0204 &lt; 0.03），<b>强制观望，禁止开仓</b>。
+    </div>
+
+    <div class="evidence">
+      <b>理由链（4 项证据）：</b><br>
+      ① 技术：五层周期方向不一致 — 180min/60min 空头排列，5min 多头排列，30min 混合（<b>multi_period_features</b>）<br>
+      ② 技术：日线空头排列 + RSI=6.14 极端超卖，但价格已反弹 +2.15%（<b>daily_features.future</b>）<br>
+      ③ 资金：OI 大幅减少 -12.12%（-23033 手），减仓上涨 = 空头平仓，非新多入场（<b>tick_analysis.oi_change_pct</b>）<br>
+      ④ 风控：market_quality = fake_breakout，假突破环境禁止追突破（<b>tick_analysis.market_quality</b>）
+    </div>
+  </div>
+
+  <!-- 外盘参考 -->
+  <div class="card">
+    <div class="card-title">外盘参考</div>
+    <table>
+      <tr><th>市场</th><th>最新价</th><th>涨跌幅</th></tr>
+      <tr><td>A50（新加坡）</td><td>13416.0</td><td class="up">+0.22%</td></tr>
+      <tr><td>恒生指数（港股）</td><td>24274.0</td><td class="up">+0.88%</td></tr>
+      <tr><td>罗素2000（美股）</td><td>2777.9</td><td class="down">-0.14%</td></tr>
+      <tr><td>标普500</td><td>7776.5</td><td class="down">-0.19%</td></tr>
+      <tr><td>纳斯达克</td><td>29992.5</td><td class="down">-0.50%</td></tr>
+      <tr><td>道琼斯</td><td>52386.0</td><td class="down">-0.08%</td></tr>
+      <tr><td>日经225</td><td>65390.0</td><td class="down">-0.61%</td></tr>
+      <tr><td>美元指数</td><td>101.93</td><td class="down">-0.40%</td></tr>
+      <tr><td>离岸人民币</td><td>6.6619</td><td class="neutral">+0.01%</td></tr>
+    </table>
+    <div class="evidence" style="margin-top:10px;">
+      <b>开盘预判：</b>A50 +0.22% + 港股 +0.88% 偏多，但美股三大指数全线收跌（纳指 -0.50%），信号矛盾 → <b>震荡开盘</b>。美元指数走弱 -0.40% 对人民币资产偏利好。
+    </div>
+  </div>
+
+  <!-- 五层周期 -->
+  <div class="card">
+    <div class="card-title">五层周期共振分析</div>
+    <table>
+      <tr><th>周期</th><th>均线排列</th><th>MACD</th><th>RSI</th><th>判定</th></tr>
+      <tr>
+        <td>180min</td>
+        <td><span class="tag tag-bear">bear</span></td>
+        <td><span class="tag tag-bear">bear</span></td>
+        <td>26.8 <span class="small">超卖</span></td>
+        <td class="down">空头</td>
+      </tr>
+      <tr>
+        <td>60min</td>
+        <td><span class="tag tag-bear">bear</span></td>
+        <td><span class="tag tag-neutral">cross_up</span></td>
+        <td>32.0</td>
+        <td class="neutral">偏空</td>
+      </tr>
+      <tr>
+        <td>30min</td>
+        <td><span class="tag tag-mixed">mixed</span></td>
+        <td><span class="tag tag-bull">bull</span></td>
+        <td>42.9</td>
+        <td class="neutral">震荡</td>
+      </tr>
+      <tr>
+        <td>5min</td>
+        <td><span class="tag tag-bull">bull</span></td>
+        <td><span class="tag tag-bull">bull</span></td>
+        <td>69.2</td>
+        <td class="up">多头</td>
+      </tr>
+      <tr>
+        <td>Tick</td>
+        <td colspan="2">OI -12.12% / 买卖比 0.514</td>
+        <td>—</td>
+        <td class="neutral">减仓</td>
+      </tr>
+    </table>
+    <div class="evidence" style="margin-top:10px;">
+      <b>周期冲突：</b>大周期（180min/60min）空头 vs 小周期（5min）多头，30min 混合。方向不一致 → 无法形成共振，<b>方向听五层 → 大周期空头占优，但小周期反弹未确认</b>。
+    </div>
+  </div>
+
+  <!-- 五维评分 -->
+  <div class="card">
+    <div class="card-title">五维量化评分</div>
+    <div class="grid2" style="margin-bottom:10px;">
+      <div class="stat">
+        <div class="k">综合得分</div>
+        <div class="v neutral">48 分</div>
+      </div>
+      <div class="stat">
+        <div class="k">市场类型</div>
+        <div class="v neutral" style="font-size:14px;">震荡双向</div>
+      </div>
+    </div>
+    <table>
+      <tr><th>维度</th><th>得分</th><th>说明</th></tr>
+      <tr><td>基差分析</td><td class="blue">16</td><td>基差 -131.05，分位 27.2%，正常</td></tr>
+      <tr><td>量价关系</td><td class="down">0</td><td>量比 0.65，缩量</td></tr>
+      <tr><td>资金流向</td><td class="blue">17</td><td>北向 +25.98 亿，偏多</td></tr>
+      <tr><td>波动率</td><td class="down">5</td><td>布林带强度 18.18</td></tr>
+      <tr><td>超买超卖</td><td class="neutral">10</td><td>RSI 46.2，中性</td></tr>
+    </table>
+    <div class="evidence" style="margin-top:10px;">
+      <b>仓位参考：</b>48 分属震荡区间（40-69），标准仓位 × 0.5 或观望。方向听五层，仓位听五维。
+    </div>
+  </div>
+
+  <!-- 关键位 -->
+  <div class="card">
+    <div class="card-title">关键支撑压力位</div>
+    <table>
+      <tr><th>类型</th><th>点位</th><th>来源</th></tr>
+      <tr><td class="down">三级极限支撑</td><td>6638.2</td><td>日线防守低点 / 昨收</td></tr>
+      <tr><td class="down">二级支撑</td><td>6656.0</td><td>日内最低点</td></tr>
+      <tr><td class="down">一级支撑</td><td>6700.0</td><td>整数关口</td></tr>
+      <tr><td class="up">一级压力</td><td>6800.0</td><td>整数关口</td></tr>
+      <tr><td class="up">二级压力</td><td>6807.0</td><td>日内最高点</td></tr>
+      <tr><td class="up">三级重压</td><td>6900.0</td><td>前高区域</td></tr>
+    </table>
+    <div class="evidence" style="margin-top:10px;">
+      <b>多空分水岭：6800 点。</b>当前价 6780.8 紧贴一级压力下方，突破 6807 需放量确认，否则视为假突破。
+    </div>
+  </div>
+
+  <!-- 开盘场景化预案 -->
+  <div class="card">
+    <div class="card-title">开盘场景化预案</div>
+
+    <div class="scenario">
+      <div class="title">场景 1：高开（开盘价 &gt; 6807）</div>
+      <div class="desc">
+        <b>策略：</b>不追多。高开若无法站稳 6807 且 OI 继续减少 → 假突破，等待回踩 6780 确认。<br>
+        <b>入场条件：</b>回踩 6780 不破 + 5min MACD 维持 bull + 放量 → 轻仓试多<br>
+        <b>止损：</b>6750（固定 30 点）｜ <b>目标：</b>6850 / 6900
+      </div>
+    </div>
+
+    <div class="scenario" style="border-left-color:#f85149;">
+      <div class="title" style="color:#f85149;">场景 2：低开（开盘价 &lt; 6700）</div>
+      <div class="desc">
+        <b>策略：</b>观望为主。跌破 6700 需观察 OI 是否增加，若减仓下跌 = 多头止损，不追空。<br>
+        <b>入场条件：</b>跌破 6656 且增仓 + 放量 → 顺势做空<br>
+        <b>止损：</b>6686（固定 30 点）｜ <b>目标：</b>6600 / 6583
+      </div>
+    </div>
+
+    <div class="scenario" style="border-left-color:#d29922;">
+      <div class="title" style="color:#d29922;">场景 3：平开（6700 - 6807 区间）</div>
+      <div class="desc">
+        <b>策略：不开仓。</b>处于中间区域，距离支撑压力均 &gt; 1 ATR，禁止开仓。<br>
+        <b>观察：</b>等待 6807 突破或 6700 跌破的明确信号，配合 OI 变化确认。
+      </div>
+    </div>
+  </div>
+
+  <!-- 执行方案 -->
+  <div class="card">
+    <div class="card-title">执行方案</div>
+
+    <div class="alert">
+      <b>⛔ 主方案：观望（概率 60%）</b><br>
+      理由：信号验证 2/5 未达标 + 流动性不足 + fake_breakout 环境，三重否决。
+    </div>
+
+    <div class="plan-box">
+      <div style="font-size:13.5px;font-weight:700;color:#3fb950;margin-bottom:8px;">备选方案 A：回踩做多（概率 25%）</div>
+      <div class="row"><span class="k">方向</span><span class="v up">做多</span></div>
+      <div class="row"><span class="k">市场状态</span><span class="v">超卖反弹</span></div>
+      <div class="row"><span class="k">入场价</span><span class="v">6750 - 6760（回踩确认）</span></div>
+      <div class="row"><span class="k">止损价</span><span class="v down">6720（固定 30 点）</span></div>
+      <div class="row"><span class="k">目标1</span><span class="v">6800（减仓 50%）</span></div>
+      <div class="row"><span class="k">目标2</span><span class="v">6850（清仓）</span></div>
+      <div class="row"><span class="k">盈亏比</span><span class="v">50/30 = 1.67</span></div>
+      <div class="row"><span class="k">仓位</span><span class="v">0.5 手（低置信度）</span></div>
+      <div class="row"><span class="k">时间窗口</span><span class="v">09:30 - 10:30</span></div>
+      <div class="row"><span class="k">失效条件</span><span class="v">跌破 6720 或 10:30 未触发</span></div>
+    </div>
+
+    <div class="plan-box" style="margin-top:10px;">
+      <div style="font-size:13.5px;font-weight:700;color:#f85149;margin-bottom:8px;">备选方案 B：破位做空（概率 15%）</div>
+      <div class="row"><span class="k">方向</span><span class="v down">做空</span></div>
+      <div class="row"><span class="k">市场状态</span><span class="v">趋势下跌</span></div>
+      <div class="row"><span class="k">入场价</span><span class="v">跌破 6656 后回抽确认</span></div>
+      <div class="row"><span class="k">止损价</span><span class="v up">6686（固定 30 点）</span></div>
+      <div class="row"><span class="k">目标1</span><span class="v">6600（减仓 50%）</span></div>
+      <div class="row"><span class="k">目标2</span><span class="v">6550（清仓）</span></div>
+      <div class="row"><span class="k">盈亏比</span><span class="v">56/30 = 1.87</span></div>
+      <div class="row"><span class="k">仓位</span><span class="v">0.5 手（低置信度）</span></div>
+      <div class="row"><span class="k">时间窗口</span><span class="v">09:30 - 11:00</span></div>
+      <div class="row"><span class="k">失效条件</span><span class="v">OI 减少破位（洗盘）或快速回抽 6680</span></div>
+    </div>
+
+    <div class="evidence" style="margin-top:10px;">
+      <b>止损说明：</b>ATR 字段值 13.33 偏小（口径异常），与实际波动不符，启用固定点数止损 30 点【因 ATR 字段口径异常启用固定点数止损】。
+    </div>
+  </div>
+
+  <!-- 风险提示 -->
+  <div class="card">
+    <div class="card-title">风险提示</div>
+    <ul style="list-style:none;font-size:13px;">
+      <li style="padding:6px 0;border-bottom:1px solid #21262d;">⚠ <b>流动性风险：</b>IC2612 vol_ratio=0.0204，远低于 0.03 阈值，滑点风险极高</li>
+      <li style="padding:6px 0;border-bottom:1px solid #21262d;">⚠ <b>假突破风险：</b>market_quality=fake_breakout，禁止追突破</li>
+      <li style="padding:6px 0;border-bottom:1px solid #21262d;">⚠ <b>减仓上涨陷阱：</b>OI -12.12% + 价格上涨 = 空头平仓，非新多入场，反弹不可持续</li>
+      <li style="padding:6px 0;border-bottom:1px solid #21262d;">⚠ <b>日线极端超卖：</b>RSI=6.14，历史极端值，可能触发超 200 点反弹（参考经验 #8）</li>
+      <li style="padding:6px 0;">⚠ <b>到期风险：</b>IC2612 距到期 63 天，暂无到期风险</li>
+    </ul>
+  </div>
+
+  <!-- 自检清单 -->
+  <div class="card">
+    <div class="card-title">自检清单（7 项强制核对）</div>
+    <ul class="checklist">
+      <li><span>1. 震荡权重校准</span><span class="warn">WARN</span></li>
+      <li><span>2. 下行缓冲预留</span><span class="ok">OK</span></li>
+      <li><span>3. 平开/中间区不开仓</span><span class="ok">OK</span></li>
+      <li><span>4. 关键位四源交叉验证</span><span class="ok">OK</span></li>
+      <li><span>5. 五维/五层一致性</span><span class="warn">WARN</span></li>
+      <li><span>6. 破位须叠加增仓确认</span><span class="ok">OK</span></li>
+      <li><span>7. 收盘持仓方向终值复核</span><span class="ok">OK</span></li>
+    </ul>
+    <div class="evidence" style="margin-top:10px;">
+      <b>说明：</b>第 1 项薄流动性日震荡权重需 +20pp；第 5 项五维（48 分震荡）与五层（大周期空头）方向不一致，已按"方向听五层、仓位听五维"处理。
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    云端测试 · 数据来源 114.55.55.139/ic500/<br>
+    本报告仅供教育参考，不构成投资建议。期货交易高风险，可能损失全部本金。
+  </div>
+
+</div>
+<script defer src="https://cdn.vercel-analytics.com/v1/script.js" data-token="ic500-weiyivip"></script>
+</body>
+</html>
